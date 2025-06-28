@@ -25,3 +25,14 @@ const pathname = usePathname();
 ## to prevent a directory inside the app directory from becoming a route just put underscore before it
 
 Ex: \_lib [It has become a private folder]
+
+## route groups
+
+(RouteGroupName) ---> inside parentheses make the order routes
+Ex: app/(group-name)/somepage/page.tsx
+
+## layout.tsx Multiple Root Layouts
+
+(RouteGroupName) ---> layout.tsx
+
+## Routing Metadata
