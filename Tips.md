@@ -137,4 +137,212 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
   );
 }
 
-# navigating programmatically 
+# navigating programmatically
+const router = useRouter();
+router.push("/);
+redirect("/) # import from next/navigation
+
+
+# Templates are similar to layout. They are used to render a component with a specific layout.
+When users navigate to a page, Next.js will render the page with the layout defined in the template. Templates are useful when you want to reuse a layout across multiple pages. 
+# Example
+- a new template component instance is mounted for each page
+- DOM elements are recreated
+- CSS is reloaded
+- JavaScript is reloaded
+- Server-side rendering is disabled
+- Static site generation is disabled
+- getStaticProps and getServerSideProps are not called
+- state is cleared
+
+# loading
+# loading.jsx or loading.tsx
+
+
+
+## Error handling
+error.tsx // must be a client component
+
+"use client";
+
+export default function ErrorBoundary({ error }: { error: Error }) {
+  return <div>{error.message}</div>;
+}
+
+
+# Recovering from errors. error.tsx has a special function called reset()  
+
+Example1: 
+
+"use client";
+
+export default function ErrorBoundary({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <p>Error: {error.message}</p>
+      <button onClick={() => reset()}>Reset</button>
+    </div>
+  );
+}
+
+
+Example2: 
+
+"use client";
+
+import { useRouter } from "next/router";
+import { startTransition } from "react";
+
+export default function ErrorBoundary({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  const router = useRouter();
+  const reload = () => {
+    startTransition(() => {
+      router.reload();
+      reset();
+    });
+  };
+
+  return (
+    <div>
+      <p>Error: {error.message}</p>
+      <button onClick={() => reload()}>Reset</button>
+    </div>
+  );
+}
+
+## Error always bubble up to the closest parent error boundary.
+## An error.tsx file handles error not just for its own folder but also for all its children below it.
+
+
+## Handling errors in layouts
+error.tsx doesn't work for layout.tsx because of component hierarchy. Layout sits above the error boundary
+
+layout.js
+template.js
+error.js
+loading.js
+not-found.js
+page.js
+
+
+To solve this you have to put the error.tsx up to the layout.tsx level. This is because error.tsx is a component that sits above the error boundary.
+
+
+## Handling Global Errors
+# If an error boundary can't catch errors in the layout.tsx file from the same segment, what about errors in the root layout?
+# It doesn't have a parent segment, right?
+
+
+#  You can use the `getInitialProps` method in the `_app.js` file to catch global errors. This is the highest level error boundary.
+#  You can also use the `error` object in the `_app.js` file to catch global errors.
+#  You can also use the `error` object in the `_app.js` file to catch global errors.
+#  To handle global errors, you can use the `ErrorBoundary` component from `next/error
+
+# global-error.tsx that goes in the root directory of your project. This will catch any error that occurs in your app.
+
+step 1: create a error-wrapper.tsx file
+step 2: wrap your app with the error-wrapper.tsx file in the _app.js file
+step 3: use the error-wrapper.tsx file to catch global errors
+step 4: create global-error.tsx
+
+
+# Parallel Routes
+
+@<dirName>
+
+Ex: @notifications ---> page.tsx
+
+Now pass this inside the layout.tsx as props. Ex: notifications 
+
+
+
+## unmatched routes for parallel routes
+When navigating nextjs keeps showing the unmatched slots as before. and if we reload the page nextjs looks for a special file called  default.tsx file in each unmatched slots. If it finds it, it will render that file instead of the unmatched slot. If it doesn't find it, it will render the unmatched slot as before.
+
+
+Create a default.tsx file for the fallback
+
+
+# conditional routes
+
+You should make conditional props in layout.tsx
+
+
+
+
+# Advanced Routing (Intercepting Routes)
+
+(.)samenameDir on the same segment
+(..)samenameDir
+(..)(..)sameDir 
+(...) Three dots tells Nextjs to match segments from the root app directory 
+
+(.) match segments on the same level
+(..) match segments one level above
+(..)(..) match segments two levels above
+(...) match segments from the root app directory
+
+
+
+# route handler
+export async function GET() {
+  return new Response("Hello world");
+}
+
+
+# GET
+
+export async function GET() {
+  return Response.json(comments);
+}
+
+# POST 
+export async function POST(request: Request) {
+  const { comment } = await request.json();
+
+  const newComment = {
+    id: comments.length + 1,
+    comment: comment,
+  };
+  comments.push(newComment);
+  return new Response(JSON.stringify(newComment), {
+    status: 201,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+# dynamic route handler
+
+✅ When to use new Response(...) vs Response.json(...)
+Situation	Use
+Return JSON	✅ Response.json(data)
+Return plain text or HTML	✅ new Response("text/html", ...)
+Need full control (headers, etc)	✅ new Response(...)
+Binary data / files	✅ new Response(blob/stream, ...)
+
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const comment = comments.find((comment) => comment.id === parseInt(id));
+
+  if (!comment) {
+    return new Response("Comment not found", { status: 404 });
+  }
+
+  return Response.json(comment);
+}
