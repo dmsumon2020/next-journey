@@ -382,3 +382,162 @@ export async function DELETE(
   }
 }
 
+# query selector 
+
+// get query selector
+export async function GET(request: NextRequest) {
+  const query = request.nextUrl.searchParams.get("q");
+
+  if (query) {
+    const filteredComments = comments.filter((comment) =>
+      comment.comment.toLowerCase().includes(query.toLowerCase())
+    );
+    return Response.json(filteredComments);
+  }
+
+  return Response.json(comments);
+}
+
+
+# Headers in route handlers
+
+1) Request Headers 
+2) Response Headers
+
+1) Request Headers : These are sent by the client such as browser. They contain information about the request such as the type of request, the type of data being sent, and any additional information that the client wants to send to the server which helps the server to process the request correctly.
+
+    Ex:
+    'User-Agent' = which identifies the browser and operating system to the server.
+    'Accept' = which specifies the type of data that the client can handle.
+    'Content-Type' = which specifies the type of data that is being sent in the request body.
+    'Authorization' = which contains the authentication token or credentials.
+
+2) Response Headers: These are sent by the server in response to the client's request. They contain information about the response such as the type of response, the type of data being sent, and any additional information that the server wants to send to the client which helps the client to process the response correctly. 
+
+    Ex: 
+    'Content-Type' = It indicates the media type of the response body. 
+    'Set-Cookie' = It sets a cookie on the client's browser.
+    'Location' = It specifies the URL of a new resource that the client should access.
+    'Cache-Control' = It specifies how the client should cache the response.
+    'ETag' = It specifies the version of the resource being sent in the response.
+    'Last-Modified' = It specifies the date and time when the resource was last modified.
+    'Expires' = It specifies the date and time after which the response is considered stale.
+    'Content-Disposition' = Specifies the filename that the client should use to save the response body
+    'Content-Language' = It specifies the language of the response body.
+    'Content-Length' = It specifies the size of the response body in bytes.
+    'Content-Range' = It specifies the range of bytes in the response body.
+    'Date' = It specifies the date and time when the response was generated.
+    'Server' = It specifies the name and version of the server software.
+    'X-RateLimit-Limit' = It specifies the maximum number of requests that can b
+    'X-RateLimit-Remaining' = It specifies the number of remaining requests.
+    'X-RateLimit-Reset' = It specifies the time at which the rate limit will
+    'X-Frame-Options' = It specifies whether the response can be framed or not.
+    'X-XSS-Protection' = It specifies whether the response should be protected against XSS attacks
+    'X-Content-Type-Options' = It specifies whether the response should be protected against MIME
+    'X-Download-Options' = It specifies whether the response should be protected against MIME
+    'X-Permitted-Cross-Domain-Policies' = It specifies the cross-domain policies
+    'X-Content-Security-Policy' = It specifies the content security policy
+    'X-Frame-Options' = It specifies whether the response can be framed or not
+    'X-Request-Id' = It specifies the request ID
+    'X-Robots-Tag' = It specifies the robots tag
+
+
+Example: 
+
+
+export async function GET(request: NextRequest) {
+  const requestHeaders = request.headers.get("Authorization");
+
+  console.log("requestHeaders: ", requestHeaders);
+  return new Response("Hello from Next!");
+}
+
+
+
+export async function GET(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+
+  console.log(requestHeaders.get("Authorization"));
+  return new Response("Hello from Next!");
+}
+
+
+export async function GET() {
+  const headersList = await headers();
+  console.log(headersList.get("Authorization"));
+  return new Response("Hello from Next!");
+}
+
+// response headers
+
+export async function GET() {
+  const headersList = await headers();
+  console.log(headersList.get("Authorization"));
+  return new Response("<h1>Hello from Next!</h1>", {
+    headers: {
+      "Content-Type": "text/html",
+    },
+  });
+}
+
+
+
+## Cookies in Route Handlers
+
+// using headers
+export async function GET() {
+
+  return new Response("<h1>Hello from Next!</h1>", {
+    headers: {
+      "Content-Type": "text/html",
+      "Set-Cookie": "myCookie=123456",
+    },
+  });
+}
+
+// using NextJS API function cookies
+export async function GET() {
+  const storeCookies = await cookies();
+  
+  console.log(storeCookies.get("Theme")); // optional
+
+  storeCookies.set("Theme", "Dark");
+  return new Response("Hello world!");
+}
+
+
+
+
+### Redirects in Route Handlers
+
+redirect("/)
+
+
+### Caching in Route Handlers
+
+export const dynamic = "force-static";
+export const revalidate = 10;
+
+export async function GET() {
+  return Response.json({ time: new Date().toLocaleString() });
+}
+
+
+## Middlewares
+-- custom matcher config
+-- conditional statements
+
+export function middleware(request: NextRequest) {
+  return NextResponse.redirect(new URL("/", request.url));
+}
+
+export const config = {
+  matcher: "/profile",
+};
+
+
+export function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === "/profile") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+}
